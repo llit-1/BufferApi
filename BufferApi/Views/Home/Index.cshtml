@@ -1,0 +1,64 @@
+﻿@model BufferApi.Models.Home.IndexModel
+
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.cdnfonts.com/css/akrobat" rel="stylesheet">
+    <link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+
+    <nav class="navigator">
+        <div> BufferLog </div>
+    </nav>
+
+    <div class="logContainer">
+        <div class="logContainer__header">
+            @if (@Model?.CalculatorLogRepository?.RepositoryItems != null)
+            {
+                <h5>Кол - во записей в обработке: @Model?.CalculatorLogRepository?.RepositoryItems?.Count()</h5>
+
+            }
+            else
+            {
+                <h5>Кол - во записей в обработке: 0</h5>
+            }
+
+        </div>
+        <div class="logContainer__main">
+            <div class="main__element">
+                <div> SessionId</div>
+                <div> ItemName</div>
+                <div> UserName</div>
+                <div> Fact</div>
+                <div> Rest</div>
+                <div> StartDate</div>
+                <div> LicvidationDate</div>
+            </div>
+            @if (Model?.CalculatorLogRepository?.RepositoryItems != null)
+            {
+                @foreach (var item in Model?.CalculatorLogRepository?.RepositoryItems)
+                {
+                    <div class="main__element">
+                        <div> @item.Item.SessionId</div>
+                        <div> @item.Item.ItemName</div>
+                        <div> @item.Item.UserName</div>
+                        <div class="lowWidth"> @item.Item.Fact</div>
+                        <div class="lowWidth"> @item.Item.Rest</div>
+                        <div> @item.StartDate</div>
+                        <div> @item.LicvidationDate</div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="main__element__empty"> Данных в обработке нет </div>
+            }
+
+        </div>
+    </div>
+
+</body>
+</html>
+
+
