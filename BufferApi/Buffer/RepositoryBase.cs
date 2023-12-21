@@ -6,9 +6,11 @@ namespace BufferApi.Buffer
     public abstract class RepositoryBase<T>
     {
         public List<RepositoryItem<T>> RepositoryItems { get; set; } = new List<RepositoryItem<T>>();
-        public void Add(T item, DateTime startDate, DateTime licvidationDate)
+        public RepositoryItem<T> Add(T item, DateTime startDate, DateTime licvidationDate)
         {
-            RepositoryItems.Add(new RepositoryItem<T>(item, startDate, licvidationDate));
+            RepositoryItem<T> repositoryItem = new RepositoryItem<T>(item, startDate, licvidationDate);
+            RepositoryItems.Add(repositoryItem);
+            return repositoryItem;
         }
 
         public void Add(List<T> Items, DateTime startDate, DateTime licvidationDate)
@@ -18,7 +20,6 @@ namespace BufferApi.Buffer
                 RepositoryItems.Add(new RepositoryItem<T>(item, startDate, licvidationDate));
             }
         }
-
 
         public virtual void TryToAdd()
         {}

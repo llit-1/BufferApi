@@ -23,7 +23,7 @@ builder.Services.AddSingleton<CalculatorLogRepository>()
                 .AddSingleton<BufferJob>()
                 .AddSingleton(new JobSchedule(
                     jobType: typeof(BufferJob),
-                    cronExpression: "0 */10 * ? * *"));
+                    cronExpression: "0 */5 * ? * *"));
 builder.Services.AddHostedService<QuartzHostedService>();
 var app = builder.Build();
 
