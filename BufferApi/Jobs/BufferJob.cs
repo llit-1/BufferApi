@@ -9,7 +9,7 @@ namespace BufferApi.Jobs
     public class BufferJob : IJob
     {
         public CalculatorLogRepository CalculatorLogRepository { get; set; }
-        public string LogPath { get; set; } = "BufferJobError";
+        public string LogPath { get; set; } = "BufferJobError.txt";
         public BufferJob(IServiceProvider serviceProvider)
         {
             CalculatorLogRepository = serviceProvider.GetRequiredService<CalculatorLogRepository>();
@@ -17,6 +17,10 @@ namespace BufferApi.Jobs
 
         Task IJob.Execute(IJobExecutionContext context)
         {
+            if (CalculatorLogRepository.RepositoryItems.Count == 0)
+            {
+                return Task.CompletedTask;
+            }
             DeleteSimilar();
             TryToAdd();
             CalculatorLogRepository.Licvidation();
@@ -94,7 +98,7 @@ namespace BufferApi.Jobs
             }
             return commandString;
         }
-        
+
     }
 }
 
