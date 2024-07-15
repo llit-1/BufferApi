@@ -36,9 +36,13 @@ namespace BufferApi.Jobs
                 {
                     connection.Open();
                     SqlCommand command = new();
-                    command.CommandText = CreateCommandString();
-                    command.Connection = connection;
-                    command.ExecuteNonQuery();
+                    var commandStrings = CreateCommandStrings();
+                    foreach (var commandString in commandStrings)
+                    {
+                        command.CommandText = commandString;
+                        command.Connection = connection;
+                        command.ExecuteNonQuery();
+                    }
                     connection.Close();
                     for (int i = 0; i < CalculatorLogRepository.RepositoryItems.Count; i++)
                     {
@@ -74,31 +78,35 @@ namespace BufferApi.Jobs
             CalculatorLogRepository.Licvidation();
         }
 
-        private string CreateCommandString()
+        private List<string> CreateCommandStrings()
         {
-            string commandString = "USE RKNET\r\nInsert into CalculatorLogsTest Values\r\n";
-            for (int i = 0; i < CalculatorLogRepository.RepositoryItems.Count; i++)
-            {
-                string datetime = CalculatorLogRepository.RepositoryItems[i].Item.Date.ToString("yyyy-dd-MM HH:mm:ss.fff");
-                string rest = "null";
-                string fact = "null";
-                if (CalculatorLogRepository.RepositoryItems[i].Item.Rest != null)
-                {
-                    rest = CalculatorLogRepository.RepositoryItems[i].Item.Rest.ToString();
-                }
-                if (CalculatorLogRepository.RepositoryItems[i].Item.Fact != null)
-                {
-                    fact = CalculatorLogRepository.RepositoryItems[i].Item.Fact.ToString();
-                }
-                commandString += $"('{CalculatorLogRepository.RepositoryItems[i].Item.UserName}', {CalculatorLogRepository.RepositoryItems[i].Item.ItemCode}, '{CalculatorLogRepository.RepositoryItems[i].Item.ItemName}', {CalculatorLogRepository.RepositoryItems[i].Item.TTCode}, '{CalculatorLogRepository.RepositoryItems[i].Item.TTName}', {rest}, {CalculatorLogRepository.RepositoryItems[i].Item.Result}, {fact}, '{datetime}', '{CalculatorLogRepository.RepositoryItems[i].Item.SessionId}')";
-                if (i < CalculatorLogRepository.RepositoryItems.Count - 1)
-                {
-                    commandString += ",\r\n";
-                }
-            }
-            return commandString;
-        }
+            List<string> commandStrings = new List<string>();
+            int maxRowsPerInsert = 1000;
+            int totalRows = CalculatorLogRepository.RepositoryItems.Count;
 
+            for (int i = 0; i < totalRows; i += maxRowsPerInsert)
+            {
+                string commandString = "USE RKNET\r\nInsert into CalculatorLogsTest Values\r\n";
+                int currentBatchSize = Math.Min(maxRowsPerInsert, totalRows - i);
+
+                for (int j = 0; j < currentBatchSize; j++)
+                {
+                    int index = i + j;
+                    string datetime = CalculatorLogRepository.RepositoryItems[index].Item.Date.ToString("yyyy-dd-MM HH:mm:ss.fff");
+                    string rest = CalculatorLogRepository.RepositoryItems[index].Item.Rest != null ? CalculatorLogRepository.RepositoryItems[index].Item.Rest.ToString() : "null";
+                    string fact = CalculatorLogRepository.RepositoryItems[index].Item.Fact != null ? CalculatorLogRepository.RepositoryItems[index].Item.Fact.ToString() : "null";
+
+                    commandString += $"('{CalculatorLogRepository.RepositoryItems[index].Item.UserName}', {CalculatorLogRepository.RepositoryItems[index].Item.ItemCode}, '{CalculatorLogRepository.RepositoryItems[index].Item.ItemName}', {CalculatorLogRepository.RepositoryItems[index].Item.TTCode}, '{CalculatorLogRepository.RepositoryItems[index].Item.TTName}', {rest}, {CalculatorLogRepository.RepositoryItems[index].Item.Result}, {fact}, '{datetime}', '{CalculatorLogRepository.RepositoryItems[index].Item.SessionId}')";
+                    if (j < currentBatchSize - 1)
+                    {
+                        commandString += ",\r\n";
+                    }
+                }
+
+                commandStrings.Add(commandString);
+            }
+
+            return commandStrings;
+        }
     }
 }
-
